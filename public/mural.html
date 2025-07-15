@@ -32,18 +32,6 @@
                 <h3>Olá, <span id="b_usuario">usuário</span>!</h3>
             </div>
 
-            <div class="btn-nav-white">
-                <a href="cards.html">
-                    <h3>Aquários</h3>
-                </a>
-            </div>
-
-            <div class="btn-nav-white">
-                <a href="./dashboard.html">
-                    <h3>Gráficos</h3>
-                </a>
-            </div>
-
             <div class="btn-nav">
                 <h3>Mural de Avisos</h3>
             </div>
@@ -58,45 +46,57 @@
 
 
             <div class="avisos">
+                        <div class="alerta_erro">
+            <div class="card_erro" id="cardErro">
+                <span id="mensagem_erro"></span>
+            </div>
                 <div id="alerta">
                 </div>
                 <div class="container">
                     <h1>Publicar um aviso</h1>
                     <div class="div-form">
-                        <form id="form_postagem" method="post" onsubmit="return publicar()">
                             <label>
                                 Título:
                                 <br>
-                                <input name="titulo" id="titulo" maxlength="100" type="text">
+                                <input name="titulo" id="ipt_titulo" maxlength="100" type="text">
                             </label>
                             <br>
                             <br>
                             <label>
                                 Autor (máximo de 70 caracteres):
                                 <br>
-                                <input type="text" name="autor" id="textarea_descricao" maxlength="70" rows="5"></input>
+                                <input type="text" id="ipt_autor" maxlength="70" rows="5"></input>
                             </label>
                             <br>
                             <br>
                             <label>
                                 Genero (máximo de 50 caracteres):
                                 <br>
-                                <input type="text" name="genero" id="textarea_descricao" maxlength="50" rows="5"></input>
+                                <select id="ipt_genero">
+                                    <option value="#">Selecione uma opção</option>
+                                    <option value="romance">Romance</option>
+                                    <option value="horror">Horror</option>
+                                    <option value="poesia">Poesia</option>
+                                    <option value="fantasia">Fantasia</option>
+                                </select>
                             </label>
                             <br>
                             <br>
                             <label>
                                 Preço de Compra:
-                                <p>R$ <input type="number" name="precoCompra" id="ipt_precoCompra"></p>
+                                <p>R$ <input type="number" id="ipt_precoCompra"></p>
                             </label>
+                            <br>
+                            <br>
                             <br>
                             <br>
                             <label>
-                                Preço de Venda:
-                                <p>R$<input type="number" name="precoVenda" id="ipt_precoVenda"></p>
+                                Quantidade de livros:
+                                <p>R$ <input type="number" id="ipt_qtd"></p>
                             </label>
-                            <button>Enviar</button>
-                        </form>
+                            <p id="preco_venda"></p>
+                            <button onclick="publicar()">Enviar</button>
+
                     </div>
                     <h1>Mural de Avisos</h1>
                     <div class="div-results">
@@ -106,6 +106,7 @@
                 </div>
             </div>
         </div>
+        
     </div>
 
 
@@ -116,7 +117,10 @@
 </html>
 
 <script>
-    
+    function sumirMensagem() {
+    cardErro.style.display = "none";
+    }
+    var caracteresEspeciais = ["!", "@", "#", "$", "%", "¨", "&", "*", "(", ")"]
     b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
 
     function limparFormulario() {
@@ -124,36 +128,59 @@
     }
 
     function publicar() {
+        var idLivro = sessionStorage.idLivro;
         // var idUsuario = sessionStorage.ID_USUARIO;
 
         // var corpo = {
             // titulo: form_postagem.titulo.value,
         //     descricao: form_postagem.descricao.value
         // }
-        var corpo = {
-            titulo: form_postagem.titulo.value,
-            autor:  form_postagem.autor.value,
-            genero: form_postagem.genero.value,
-            precoCompra:form_postagem.precoCompra.value,
-            dataHoraCompra: "now()",
-            precoVenda: form_postagem.precoVenda.value,
-            dataHoraVenda: "now()",
-            fkEstoque: 1
+        let precoDCompra = Number(ipt_precoCompra.value);
+        let precoDVenda = 0;
+        let generoLivro = ipt_genero.value;
+        let qtd = Number(ipt_qtd.value);
+
+        for(i = 0; i < caracteresEspeciais.length; i++){
+            if(caracteresEspeciais[i].includes(ipt_autor.value)){
+                cardErro.style.display = "block"
+                mensagem_erro.innerHTML = "email: SPTech e senha: 0000";
+                setInterval(sumirMensagem, 5000)
+                
+            }
         }
 
-        fetch(`/avisos/publicar/${1}`, {
+        if(precoDCompra >= 100 && generoLivro == "horror" || generoLivro == "romance"){
+            precoDVenda = precoDCompra * 1.225;
+        }else if(precoDCompra <= 50 && generoLivro == "poesia" || generoLivro == "horror"){
+            precoDVenda = precoDCompra * 1.25;
+        }else if(precoDCompra > 50 && precoDCompra < 100 && generoLivro == "fantasia"){
+            precoDVenda = precoDCompra * 1.275
+        }
+        precoDVenda = precoDVenda.toFixed(2)
+        console.log(ipt_titulo.value, ipt_autor.value, generoLivro, precoDCompra, precoDVenda, qtd)
+        var corpo = {
+            titulo: ipt_titulo.value,
+            autor:  ipt_autor.value,
+            genero: generoLivro,
+            precoCompra:precoDCompra,
+            precoVenda: precoDVenda,
+            qtdLivros: qtd,
+            fkEstoque: 1
+        }
+        console.log("Corpo(json): " + corpo)
+// ${idUsuario}
+        fetch(`/avisos/publicar`, {
             method: "post",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(corpo)
         }).then(function (resposta) {
-
             console.log("resposta: ", resposta);
 
             if (resposta.ok) {
                 window.alert("Post realizado com sucesso pelo usuario de ID: " + 1 + "!");
-                window.location = "/dashboard/mural.html";
+                window.location = "mural.html";
                 limparFormulario();
                 finalizarAguardar();
             } else if (resposta.status == 404) {
@@ -170,17 +197,17 @@
 
     }
 
-    function editar(idAviso) {
-        sessionStorage.ID_POSTAGEM_EDITANDO = idAviso;
-        console.log("cliquei em editar - " + idAviso);
+    function editar(idLivro) {
+        sessionStorage.ID_POSTAGEM_EDITANDO = idLivro;
+        console.log("cliquei em editar - " + idLivro);
         window.alert("Você será redirecionado à página de edição do aviso de id número: " + idAviso);
         window.location = "/dashboard/edicao-aviso.html"
 
     }
 
     function deletar(idAviso) {
-        console.log("Criar função de apagar post escolhido - ID" + idAviso);
-        fetch(`/avisos/deletar/${idAviso}`, {
+        console.log("Criar função de apagar post escolhido - ID" + idLivro);
+        fetch(`/avisos/deletar/${idLivro}`, {
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json"
@@ -230,10 +257,16 @@
                         var btnDeletar = document.createElement("button");
 
 
-                        spanID.innerHTML = "ID: <b>" + publicacao.idAviso + "</b>";
+                        spanID.innerHTML = "ID: <b>" + publicacao.idLivro + "</b>";
                         spanTitulo.innerHTML = "Título: <b>" + publicacao.titulo + "</b>";
-                        spanNome.innerHTML = "Autor: <b>" + publicacao.nome + "</b>";
-                        divDescricao.innerHTML = "Descrição: <b>" + publicacao.descricao + "</b>";
+                        spanNome.innerHTML = "Autor: <b>" + publicacao.autor + "</b>";
+                        divDescricao.innerHTML = `Genêro: <b>${publicacao.genero}</b><br><br>
+                        Preço de Compra: <b>R$${publicacao.precoCompra}</b><br>
+                        Data de Compra: <b>${publicacao.Data_Compra}</b><br><br>
+                        Quantidade em estoque: <b>${publicacao.qtd}</b><br><br>
+                        Preço de Venda: <b>R$${publicacao.precoVenda}</b><br><br>
+                        Data e hora da venda: <b>${publicacao.Data_Venda}</b>
+                        `;
                         btnEditar.innerHTML = "Editar";
                         btnDeletar.innerHTML = "Deletar";
 
