@@ -58,13 +58,11 @@ function pesquisarDescricao(texto) {
 //     return database.executar(instrucaoSql);
 // }
 
-function publicar(titulo, autor, genero, precoCompra, precoVenda) {
+function publicar(titulo, autor, genero, precoCompra, precoVenda, qtd) {
     console.log("ACESSEI O AVISO MODEL \n \n\t\t >> Se aqui der erro de 'Error: connect ECONNREFUSED',\n \t\t >> verifique suas credenciais de acesso ao banco\n \t\t >> e se o servidor de seu BD está rodando corretamente. \n\n function publicar(): ", titulo);
     var instrucaoSql = `
         INSERT INTO livros (titulo, autor, genero, precoCompra, dataHoraCompra, precoVenda, dataHoraVenda, qtd, fkEstoque) VALUES 
-        (
-        '${titulo}', '${autor}', ${genero}, ${precoCompra}, now(), ${precoVenda}, now(),${qtd}, 1)
-        );
+        ('${titulo}', '${autor}', '${genero}', ${precoCompra}, now(), ${precoVenda}, now(),${qtd}, 1);
     `;
     console.log("Executando a instrução SQL: \n" + instrucaoSql);
     return database.executar(instrucaoSql);

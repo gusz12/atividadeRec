@@ -62,19 +62,25 @@ function pesquisarDescricao(req, res) {
 
 function publicar(req, res) {
     var titulo = req.body.titulo;
-    var autor = req.body.descricao;
+    var autor = req.body.autor;
     var genero = req.body.genero;
     var precoCompra = req.body.precoCompra;
     var precoVenda = req.body.precoVenda;
-    var qtd = req.body.qtdLivros
+    var qtd = req.body.qtd;
 
     if (titulo == undefined) {
         res.status(400).send("O título está indefinido!");
     } else if (autor == undefined) {
-        res.status(400).send("A descrição está indefinido!");
+        res.status(400).send("A autor está indefinido!");
     } else if (genero == undefined) {
-        res.status(403).send("O id do usuário está indefinido!");
-    } else {
+        res.status(403).send("O genero do usuário está indefinido!");
+    } else if (precoCompra == undefined) {
+        res.status(403).send("O precoCompra do usuário está indefinido!");
+    } else if (precoVenda == undefined) {
+        res.status(403).send("O precoVenda do usuário está indefinido!");
+    } else if (qtd == undefined) {
+        res.status(403).send("O qtd do usuário está indefinido!");
+    }  else {
         avisoModel.publicar(titulo, autor, genero, precoCompra, precoVenda, qtd)
             .then(
                 function (resultado) {
